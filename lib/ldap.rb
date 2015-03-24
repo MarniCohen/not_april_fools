@@ -25,8 +25,8 @@ def read_all_users(ldap)
   filter = Net::LDAP::Filter.eq("uid", "*")
   ldap.search(:base => "dc=puppetlabs,dc=com", :filter => filter) do |entry|
     if entry[:jpegphoto]
-      ldap_photo = entry[:jpegphoto].inspect
-      uid = entry[:uid].inspect
+      ldap_photo = entry[:jpegphoto]
+      uid = entry[:uid]
       photo_path = "ldap_photos/#{uid}.jpg"
       File.open(photo_path, 'wb') { |f| f.write(ldap_photo) }
     else
