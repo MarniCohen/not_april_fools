@@ -1,17 +1,21 @@
 require 'rubygems'
-require 'activeldap'
 require_relative 'ldap.rb'
 
 def save_all_photos
-  if ldap_bind.bind
-    read_all_users(ldap)
-    for user_array.each do |user|
-      uid = user.uid
-      photo_path = "/ldap_photos/#{uid}.jpg"
-      if user.has_photo?(uid)
-        ldap_photo = user.photo
-        File.open(photo_path, 'wb') { |f| f.write(ldap_photo) }
+  ldap = ldap_bind
+  filter = Net::LDAP::Filter.eq("uid", "*")
+  ldap.search(:base => "dc=puppetlabs,dc=com", :filter => filter) do |entry|
+    if !entry[:jpegphoto].empty?
+      ldap_photo = entry[:jpegphoto].join
+      uid = entry[:uid].join
+      photo_path = "ldap_photos/#{uid}.jpg"
+      backup_photo = File.open(photo_path, 'wb') { |f| f.write(ldap_photo)     }
+      if File.size?(photo_path)
+      else
+        File.delete(photo_path)
       end
     end
   end
 end
+
+save_all_photos

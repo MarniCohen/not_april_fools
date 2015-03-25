@@ -10,7 +10,7 @@ def ldap_bind
   ldap_port = config['port']
   ldap_pass = config['pass']
 
-  ldap = Net::LDAP.new :host => ldap_host,
+  Net::LDAP.new :host => ldap_host,
                        :port => ldap_port,
                        :encryption => :simple_tls,
                        :auth => {
@@ -18,15 +18,14 @@ def ldap_bind
                           :username => ldap_dn,
                           :password => ldap_pass
   }
-  read_all_users(ldap)
 end
 
 def read_all_users(ldap)
   filter = Net::LDAP::Filter.eq("uid", "*")
   ldap.search(:base => "dc=puppetlabs,dc=com", :filter => filter) do |entry|
     if entry[:jpegphoto]
-      ldap_photo = entry[:jpegphoto]
-      uid = entry[:uid]
+      ldap_photo = entry[:jpegphoto].join
+      uid = entry[:uid].join
       photo_path = "ldap_photos/#{uid}.jpg"
       File.open(photo_path, 'wb') { |f| f.write(ldap_photo) }
     else
